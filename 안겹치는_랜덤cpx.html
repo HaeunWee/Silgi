@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>랜덤 cpx 선택기 + 타이머</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif;background:#f7f9fc;color:#111;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+    .card{background:white;border-radius:12px;box-shadow:0 8px 30px rgba(15,20,30,0.08);padding:30px;width:360px;text-align:center}
+    h1{margin:0 0 12px;font-size:20px}
+    .display{font-size:36px;font-weight:700;height:56px;display:flex;align-items:center;justify-content:center;margin:18px 0;border:2px dashed #e6eef8;border-radius:8px}
+    .controls{display:flex;gap:10px;justify-content:center}
+    button{padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    button#start{background:#2563eb;color:white}
+    button#reset{background:#eef2ff;color:#1e3a8a}
+    .timer{margin-top:12px;color:#334155;font-weight:600}
+    .note{font-size:12px;color:#64748b;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>랜덤 cpx 선택기</h1>
+    <div class="display" id="selected">-</div>
+
+    <div class="controls">
+      <button id="start">Start</button>
+      <button id="reset">Reset</button>
+    </div>
+
+    <div class="timer" id="timer">타이머: 0분 0.00초</div>
+    <div class="note">Start를 누르면 남은 항목 중에서 하나가 랜덤으로 선택됩니다. 선택된 항목은 다음 선택에서 제외됩니다.</div>
+  </div>
+
+  <script>
+    const initialItems = ['급성 복통', '소화불량', '만성 복통', '토혈', '혈변', '구토', '변비', '설사', '황달(성인)', '황달(아기)', '가슴 통증', '실신', '두근거림', '고혈압', '이상지질혈증', '기침', '콧물', '코막힘', '객혈', '호흡곤란', '다뇨증', '핍뇨', '붉은색 소변', '배뇨 이상', '소변 찔끔증', '발열', '쉽게 멍이 듦', '피로', '체중 감소', '체중 증가', '비만', '관절 통증&부기', '목 통증', '허리 통증', '피부 발진', '기분 변화', '불안', '수면장애', '기억력 저하', '어지럼', '두통', '경련(성인)', '경련(소아)', '근력&감각 이상', '의식장애', '떨림&운동 이상', '유방통&유방덩이', '질분비물', '질출혈', '월경 이상(무월경)', '월경 이상(월경 과다)', '월경통', '산전 진찰', '성장&발달 지연', '예방접종', '음주상담', '금연상담', '물질 오남용', '나쁜 소식 전하기', '가정 폭력', '성 폭력', '자살'
+];
+
+    let pool = [...initialItems];
+    let selectedEl = document.getElementById('selected');
+    let timerEl = document.getElementById('timer');
+    let startBtn = document.getElementById('start');
+    let resetBtn = document.getElementById('reset');
+
+    let timerInterval = null;
+    let startTime = null;
+
+    function formatTime(elapsed){
+      let totalSeconds = elapsed / 1000;
+      let minutes = Math.floor(totalSeconds / 60);
+      let seconds = (totalSeconds % 60).toFixed(2);
+      return `${minutes}분 ${seconds}초`;
+    }
+
+    function startTimer(){
+      stopTimer();
+      startTime = Date.now();
+      timerEl.textContent = `타이머: 0분 0.00초`;
+      timerInterval = setInterval(()=>{
+        let elapsed = Date.now() - startTime;
+        timerEl.textContent = `타이머: ${formatTime(elapsed)}`;
+      }, 10);
+    }
+
+    function stopTimer(){
+      if(timerInterval !== null){
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function pickRandom(){
+      if(pool.length === 0){
+        selectedEl.textContent = '모두 선택되었습니다.';
+        startBtn.disabled = true;
+        startBtn.style.opacity = 0.6;
+        stopTimer();
+        return;
+      }
+
+      const idx = Math.floor(Math.random() * pool.length);
+      const item = pool.splice(idx, 1)[0];
+
+      selectedEl.textContent = item;
+      startTimer();
+    }
+
+    function resetAll(){
+      pool = [...initialItems];
+      selectedEl.textContent = '-';
+      stopTimer();
+      timerEl.textContent = `타이머: 0분 0.00초`;
+      startBtn.disabled = false;
+      startBtn.style.opacity = 1;
+    }
+
+    startBtn.addEventListener('click', pickRandom);
+    resetBtn.addEventListener('click', resetAll);
+
+    resetAll();
+  </script>
+</body>
+</html>
